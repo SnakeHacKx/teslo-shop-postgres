@@ -1,8 +1,15 @@
+import { join } from 'path';
+
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { ProductsModule } from './products/products.module';
+import { SeedModule } from './seed/seed.module';
+import { FilesModule } from './files/files.module';
 import { CommonModule } from './common/common.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -17,8 +24,15 @@ import { CommonModule } from './common/common.module';
       autoLoadEntities: true,
       synchronize: true, // Si las entidades sufren un cambio, las sincroniza de una, NO dejr en produccion
     }),
+    
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public')
+    }),
     ProductsModule,
-    CommonModule
+    CommonModule,
+    SeedModule,
+    FilesModule,
+    AuthModule
   ],
 })
 export class AppModule {}
