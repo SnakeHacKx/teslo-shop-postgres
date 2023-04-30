@@ -13,6 +13,7 @@ import { Product } from './entities/product.entity';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { validate as isUUID } from 'uuid';
 import { ProductImage } from './entities';
+import { User } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class ProductsService {
@@ -28,7 +29,7 @@ export class ProductsService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto, user: User) {
     try {
       const { images = [], ...productDetails } = createProductDto;
 
@@ -37,6 +38,7 @@ export class ProductsService {
         images: images.map((image) =>
           this.productImageRepository.create({ url: image }),
         ),
+        user,
       });
 
       await this.productRepository.save(product);
@@ -98,7 +100,7 @@ export class ProductsService {
     };
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  async update(id: string, updateProductDto: UpdateProductDto, user: User) {
     const { images, ...toUpdate } = updateProductDto;
 
     // Busca un producto por el ID y carga las propiedas que esten en el updateProductDto
@@ -123,8 +125,9 @@ export class ProductsService {
           this.productImageRepository.create({ url: image }),
         );
       } else {
-
       }
+
+      product.user = user;
 
       await queryRunner.manager.save(product);
 
@@ -151,7 +154,7 @@ export class ProductsService {
 
   // El :never nos dice que esta funcion jamas devolvera un valor
   private handleDBExceptions(error: any): never {
-    console.log("ERROR");
+    console.log('ERROR');
     if (error.code === '23505') {
       throw new BadRequestException(error.detail);
     }
@@ -162,15 +165,11 @@ export class ProductsService {
     );
   }
 
-
   //! Averigurar como hacer para no permitir que esto se llame en produccion
   async deleteAllProducts() {
     const query = this.productRepository.createQueryBuilder('product');
     try {
-      return await query
-      .delete()
-      .where({})
-      .execute();
+      return await query.delete().where({}).execute();
     } catch (error) {
       this.handleDBExceptions(error);
     }
