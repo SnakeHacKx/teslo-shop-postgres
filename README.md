@@ -21,5 +21,9 @@ yarn start:dev
 ```
 7. Ejecutar SEED desde este endpoint:
 ```
-http://localhost:3000/api/seed
+http://localhost:<PORT>/api/seed
+```
+# Documentacion
+```
+http://localhost:<PORT>/api
 ```
